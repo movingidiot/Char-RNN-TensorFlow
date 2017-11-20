@@ -2,7 +2,7 @@ import tensorflow as tf
 from read_utils import TextConverter
 from model import CharRNN
 import os
-from IPython import embed
+# from IPython import embed
 
 FLAGS = tf.flags.FLAGS
 
@@ -17,7 +17,7 @@ tf.flags.DEFINE_integer('max_length', 30, 'max length to generate')
 
 
 def main(_):
-    FLAGS.start_string = FLAGS.start_string.decode('utf-8')
+    # FLAGS.start_string = FLAGS.start_string.decode('utf-8')
     converter = TextConverter(filename=FLAGS.converter_path)
     if os.path.isdir(FLAGS.checkpoint_path):
         FLAGS.checkpoint_path =\
