@@ -42,13 +42,15 @@ def main(_):
                     learning_rate=FLAGS.learning_rate,
                     train_keep_prob=FLAGS.train_keep_prob,
                     use_embedding=FLAGS.use_embedding,
-                    embedding_size=FLAGS.embedding_size
+                    embedding_size=FLAGS.embedding_size,
+                    converter=converter
                     )
     model.train(g,
                 FLAGS.max_steps,
                 model_path,
                 FLAGS.save_every_n,
                 FLAGS.log_every_n,
+                1
                 )
 
 

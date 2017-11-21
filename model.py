@@ -16,7 +16,7 @@ def pick_top_n(preds, vocab_size, top_n=5):
     return c
 
 class CharRNN:
-    def __init__(self, num_classes, num_seqs=64, num_steps=50,
+    def __init__(self, num_classes,converter, num_seqs=64, num_steps=50,
                  lstm_size=128, num_layers=2, learning_rate=0.001,
                  grad_clip=5, sampling=False, train_keep_prob=0.5, use_embedding=False, embedding_size=128):
         if sampling is True:
@@ -34,6 +34,7 @@ class CharRNN:
         self.train_keep_prob = train_keep_prob
         self.use_embedding = use_embedding
         self.embedding_size = embedding_size
+        self.converter=converter
 
         tf.reset_default_graph()
         self.build_inputs()
@@ -100,7 +101,7 @@ class CharRNN:
         train_op = tf.train.AdamOptimizer(self.learning_rate)
         self.optimizer = train_op.apply_gradients(zip(grads, tvars))
 
-    def train(self, batch_generator, max_steps, save_path, save_every_n, log_every_n):
+    def train(self, batch_generator, max_steps, save_path, save_every_n, log_every_n,sample_per_n_batch=-1):
         self.session = tf.Session()
         with self.session as sess:
             sess.run(tf.global_variables_initializer())
@@ -127,11 +128,16 @@ class CharRNN:
                           '{:.4f} sec/batch'.format((end - start)))
                 if (step % save_every_n == 0):
                     self.saver.save(sess, os.path.join(save_path, 'model'), global_step=step)
+                if step%sample_per_n_batch==0:
+                    self.sample(200,[],self.num_classes)
                 if step >= max_steps:
                     break
             self.saver.save(sess, os.path.join(save_path, 'model'), global_step=step)
 
     def sample(self, n_samples, prime, vocab_size):
+        print(n_samples)
+        print(prime)
+        print(vocab_size)
         samples = [c for c in prime]
         sess = self.session
         new_state = sess.run(self.initial_state)
@@ -154,6 +160,8 @@ class CharRNN:
         for i in range(n_samples):
             x = np.zeros((1, 1))
             x[0, 0] = c
+            print(x)
+            print(self.inputs)
             feed = {self.inputs: x,
                     self.keep_prob: 1.,
                     self.initial_state: new_state}

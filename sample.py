@@ -26,7 +26,7 @@ def main(_):
     model = CharRNN(converter.vocab_size, sampling=True,
                     lstm_size=FLAGS.lstm_size, num_layers=FLAGS.num_layers,
                     use_embedding=FLAGS.use_embedding,
-                    embedding_size=FLAGS.embedding_size)
+                    embedding_size=FLAGS.embedding_size,converter=converter)
 
     model.load(FLAGS.checkpoint_path)
 

@@ -3,6 +3,7 @@ import copy
 import time
 import tensorflow as tf
 import pickle
+import jieba
 
 
 def batch_generator(arr, n_seqs, n_steps):
@@ -66,6 +67,7 @@ class TextConverter(object):
 
     def text_to_arr(self, text):
         arr = []
+        text=jieba.lcut(text)
         for word in text:
             arr.append(self.word_to_int(word))
         return np.array(arr)
