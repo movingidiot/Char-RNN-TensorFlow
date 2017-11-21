@@ -5,14 +5,25 @@ import numpy as np
 import time
 import os
 
+dictionary=[]
+
+def dict_clear():
+    dictionary=[]
+    a=1
+
 def pick_top_n(preds, vocab_size, top_n=5):
     p = np.squeeze(preds)
     # 将除了top_n个预测值的位置都置为0
-    p[np.argsort(p)[:-top_n]] = 0
+    for i in dictionary:
+        p[i]=0
+    p_index=np.argsort(p)
+    p[p_index[:-top_n]] = 0
     # 归一化概率
     p = p / np.sum(p)
     # 随机选取一个字符
     c = np.random.choice(vocab_size, 1, p=p)[0]
+    if not c in range(4) and not c in dictionary:
+        dictionary.append(c)
     return c
 
 class CharRNN:
@@ -136,6 +147,7 @@ class CharRNN:
         sess = self.session
         new_state = sess.run(self.initial_state)
         preds = np.ones((vocab_size, ))  # for prime=[]
+        count=0
         for c in prime:
             x = np.zeros((1, 1))
             # 输入单个字符
@@ -145,6 +157,10 @@ class CharRNN:
                     self.initial_state: new_state}
             preds, new_state = sess.run([self.proba_prediction, self.final_state],
                                         feed_dict=feed)
+            count+=1
+            if count==26:
+                dict_clear()
+                count=0
 
         c = pick_top_n(preds, vocab_size)
         # 添加字符到samples中
@@ -162,6 +178,10 @@ class CharRNN:
 
             c = pick_top_n(preds, vocab_size)
             samples.append(c)
+            count+=1
+            if count==26:
+                dict_clear()
+                count=0
 
         return np.array(samples)
 
