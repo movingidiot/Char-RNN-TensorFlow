@@ -102,5 +102,4 @@ ENV/
 # custom
 
 model/
-data/forbidden.txt
-data/threekingdoms.txt
+data/
