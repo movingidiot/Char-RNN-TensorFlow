@@ -20,6 +20,7 @@ tf.flags.DEFINE_integer('max_steps', 100000, 'max steps to train')
 tf.flags.DEFINE_integer('save_every_n', 1000, 'save the model every n steps')
 tf.flags.DEFINE_integer('log_every_n', 10, 'log to the screen every n steps')
 tf.flags.DEFINE_integer('max_vocab', 3500, 'max char number')
+tf.flags.DEFINE_string('checkpoint_path', None, 'checkpoint path')
 
 
 def main(_):
@@ -45,6 +46,8 @@ def main(_):
                     embedding_size=FLAGS.embedding_size,
                     converter=converter
                     )
+    if FLAGS.checkpoint_path:
+        model.load(FLAGS.checkpoint_path)
     model.train(g,
                 FLAGS.max_steps,
                 model_path,

@@ -3,7 +3,6 @@ import copy
 import time
 import tensorflow as tf
 import pickle
-import jieba
 
 
 def batch_generator(arr, n_seqs, n_steps):
@@ -27,6 +26,7 @@ class TextConverter(object):
             with open(filename, 'rb') as f:
                 self.vocab = pickle.load(f)
         else:
+            text=tf.compat.as_str(text).split()
             vocab = set(text)
             print(len(vocab))
             # max_vocab_process
@@ -59,7 +59,7 @@ class TextConverter(object):
 
     def int_to_word(self, index):
         if index == len(self.vocab):
-            return '<unk>'
+            return ''
         elif index < len(self.vocab):
             return self.int_to_word_table[index]
         else:
@@ -67,7 +67,8 @@ class TextConverter(object):
 
     def text_to_arr(self, text):
         arr = []
-        text=jieba.lcut(text)
+        text=tf.compat.as_str(text).split()
+        print(len(text))
         for word in text:
             arr.append(self.word_to_int(word))
         return np.array(arr)

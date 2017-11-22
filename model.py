@@ -42,6 +42,7 @@ class CharRNN:
         self.build_loss()
         self.build_optimizer()
         self.saver = tf.train.Saver()
+        self.loaded=False
 
     def build_inputs(self):
         with tf.name_scope('inputs'):
@@ -102,7 +103,8 @@ class CharRNN:
         self.optimizer = train_op.apply_gradients(zip(grads, tvars))
 
     def train(self, batch_generator, max_steps, save_path, save_every_n, log_every_n,sample_per_n_batch=-1):
-        self.session = tf.Session()
+        if not self.loaded:
+            self.session = tf.Session()
         with self.session as sess:
             sess.run(tf.global_variables_initializer())
             # Train network
@@ -128,16 +130,11 @@ class CharRNN:
                           '{:.4f} sec/batch'.format((end - start)))
                 if (step % save_every_n == 0):
                     self.saver.save(sess, os.path.join(save_path, 'model'), global_step=step)
-                if step%sample_per_n_batch==0:
-                    self.sample(200,[],self.num_classes)
                 if step >= max_steps:
                     break
             self.saver.save(sess, os.path.join(save_path, 'model'), global_step=step)
 
     def sample(self, n_samples, prime, vocab_size):
-        print(n_samples)
-        print(prime)
-        print(vocab_size)
         samples = [c for c in prime]
         sess = self.session
         new_state = sess.run(self.initial_state)
@@ -160,8 +157,6 @@ class CharRNN:
         for i in range(n_samples):
             x = np.zeros((1, 1))
             x[0, 0] = c
-            print(x)
-            print(self.inputs)
             feed = {self.inputs: x,
                     self.keep_prob: 1.,
                     self.initial_state: new_state}
@@ -176,4 +171,7 @@ class CharRNN:
     def load(self, checkpoint):
         self.session = tf.Session()
         self.saver.restore(self.session, checkpoint)
+        # print(tf.train.get_checkpoint_state(checkpoint).model_checkpoint_path)
+        # self.saver.restore(self.session,tf.train.get_checkpoint_state(checkpoint).model_checkpoint_path)
         print('Restored from: {}'.format(checkpoint))
+        self.loaded=True
