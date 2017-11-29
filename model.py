@@ -60,6 +60,7 @@ class CharRNN:
                 with tf.device("/cpu:0"):
                     embedding = tf.get_variable('embedding', [self.num_classes, self.embedding_size])
                     self.lstm_inputs = tf.nn.embedding_lookup(embedding, self.inputs)
+                    self.embedding=embedding
 
     def build_lstm(self):
         # 创建单个cell并堆叠多层
@@ -165,6 +166,33 @@ class CharRNN:
 
             c = pick_top_n(preds, vocab_size)
             samples.append(c)
+
+
+        ans=sess.run(self.embedding)
+        from sklearn.manifold import TSNE
+        import matplotlib.pyplot as plt
+        import matplotlib
+
+        tsne = TSNE(perplexity=30, n_components=2,
+                init='pca', n_iter=5000, method='exact')
+        plot_only = 1000
+        low_dim_embs = tsne.fit_transform(ans[:plot_only, :])
+        labels = [self.converter.int_to_word(i) for i in range(plot_only)]
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['font.family'] = 'sans-serif'
+        assert low_dim_embs.shape[0] >= len(labels), 'More labels than embeddings'
+        plt.figure(figsize=(18, 18))  # in inches
+        for i, label in enumerate(labels):
+            x, y = low_dim_embs[i, :]
+            plt.scatter(x, y)
+            plt.annotate(label,
+                     xy=(x, y),
+                     xytext=(5, 2),
+                     textcoords='offset points',
+                     ha='right',
+                     va='bottom')
+
+        plt.savefig('words_forbidden.png')
 
         return np.array(samples)
 
